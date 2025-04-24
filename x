@@ -76,52 +76,114 @@ stem(t, h);
 title('Stem Plot of Impulse Response');
 
 % 9. DFT and IDFT of a Signal
-w = [0:500]*pi/500;
-j = 1i;
-z = exp(-j * w);
-x = 3 * (1 - 0.9 * z) ^ (-1);
-a = abs(x);
-b = angle(x) * 180 / pi;
-figure(5);
+x = [1, 2, 3, 4, 5]; % Example signal
+X = fft(x); % DFT using MATLAB's fft function
+
+% Plot the magnitude and phase of the DFT
 subplot(2,1,1);
-plot(w / pi, a);  % Magnitude
+stem(0:length(X)-1, abs(X));
+title('Magnitude of DFT');
+xlabel('Frequency Index k');
+ylabel('Magnitude');
+
 subplot(2,1,2);
-plot(w / pi, b);  % Phase
+stem(0:length(X)-1, angle(X));
+title('Phase of DFT');
+xlabel('Frequency Index k');
+ylabel('Phase (radians)');
+
+IDFT
+x_reconstructed = ifft(X); % Inverse DFT using MATLAB's ifft function
+
+% Plot the original and reconstructed signal
+subplot(2,1,1);
+stem(0:length(x)-1, x);
+title('Original Time Domain Signal');
+xlabel('Time Index n');
+ylabel('Amplitude');
+
+subplot(2,1,2);
+stem(0:length(x_reconstructed)-1, real(x_reconstructed)); % Take the real part of IDFT
+title('Reconstructed Time Domain Signal (from IDFT)');
+xlabel('Time Index n');
+ylabel('Amplitude');
+
+
 
 % 10. DTFT (Discrete Time Fourier Transform) 
-w = -4*pi:8*pi/511:4*pi;
-num = [2, 1];
-den = [1, -0.6];
-h = freqz(num, den, w);
-figure(6);
-subplot(2,2,1);
-plot(w / pi, real(h));
-title('Real Part of H(e^{j\omega})');
-subplot(2,2,2);
-plot(w / pi, imag(h));
-title('Imaginary Part of H(e^{j\omega})');
-subplot(2,2,3);
-plot(w / pi, abs(h));
-title('Magnitude Spectrum |H(e^{j\omega})|');
-subplot(2,2,4);
-plot(w / pi, angle(h));
-title('Phase Spectrum arg[H(e^{j\omega})]');
+x = [1, 2, 3, 4];  % Discrete-time signal
+N = 1024;          % Number of frequency points
+
+[X, w] = freqz(x, 1, N);  % Numerator = x, Denominator = 1 (no system)
+
+% Plot
+figure;
+subplot(2,1,1);
+plot(w/pi, abs(X));
+title('Magnitude of DTFT (via freqz)');
+xlabel('\omega / \pi');
+ylabel('|X(\omega)|');
+grid on;
+
+subplot(2,1,2);
+plot(w/pi, angle(X));
+title('Phase of DTFT (via freqz)');
+xlabel('\omega / \pi');
+ylabel('Phase of X(\omega)');
+grid on;
+
+
+using FFT
+x = [1, 2, 3, 4];
+N = 1024;  % Zero-padding for higher resolution
+X = fft(x, N);  % FFT is a sampled DTFT
+
+w = linspace(0, 2*pi, N);  % Frequencies
+
+% Plot
+figure;
+subplot(2,1,1);
+plot(w/pi, abs(X));
+title('Magnitude of DTFT (via fft)');
+xlabel('\omega / \pi');
+ylabel('|X(\omega)|');
+
+subplot(2,1,2);
+plot(w/pi, angle(X));
+title('Phase of DTFT (via fft)');
+xlabel('\omega / \pi');
+ylabel('Phase of X(\omega)');
+grid on;
+
+
+
+
+
+
 
 % 11. N-point DFT
-N = input('Enter the value of N for N-point DFT: ');
-x = input('Enter the sequence for DFT calculation: ');
-n = 0:N-1;
-k = 0:N-1;
-WN = exp(-1i * 2 * pi / N);
-nk = n' * k;
-WNnK = WN .^ nk;
-Xk = x * WNnK;
-MagX = abs(Xk);  % Magnitude of DFT
-PhaseX = angle(Xk) * 180 / pi;  % Phase of DFT
-figure(7);
+x = [1, 2, 3, 4];    % Your input signal
+N = length(x);       % DFT size (same as signal length)
+
+n = 0:N-1;           % Time index
+k = n';              % Frequency index as column for matrix multiply
+
+WN = exp(-1i * 2 * pi / N);  % DFT root of unity
+WNnk = WN .^ (k * n);        % DFT matrix
+
+X = WNnk * x.';              % DFT computation
+
+% Plot magnitude and phase
+figure;
 subplot(2,1,1);
-plot(k, MagX);
+stem(0:N-1, abs(X));
 title('Magnitude of DFT');
+xlabel('Frequency index k');
+ylabel('|X[k]|');
+
 subplot(2,1,2);
-plot(k, PhaseX);
+stem(0:N-1, angle(X));
 title('Phase of DFT');
+xlabel('Frequency index k');
+ylabel('∠X[k] (radians)');
+
